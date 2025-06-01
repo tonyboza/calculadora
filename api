@@ -1,0 +1,15 @@
+import requests
+import json
+
+def obtener_datos_vehiculo(marca, modelo):
+    url = f"https://www.automobile-catalog.com/api/{marca}/{modelo}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+# Ejemplo
+datos = obtener_datos_vehiculo("bmw", "3-series")
+if datos:
+    with open('bmw_3series.json', 'w') as f:
+        json.dump(datos, f, indent=2)

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Vinilización</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card { margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .result-section { background-color: #f8f9fa; padding: 20px; border-radius: 5px; }
+        .loading { display: none; text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Calculadora de Presupuesto para Vinilización</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Datos del Vehículo</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="marca" class="form-label">Marca:</label>
+                            <select class="form-select" id="marca">
+                                <option value="">-- Selecciona marca --</option>
+                                {% for marca in marcas %}
+                                <option value="{{ marca }}">{{ marca|capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="modelo" class="form-label">Modelo:</label>
+                            <select class="form-select" id="modelo" disabled>
+                                <option value="">-- Selecciona modelo --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tipoVinil" class="form-label">Tipo de vinilo:</label>
+                            <select class="form-select" id="tipoVinil">
+                                <option value="standard">Vinilo estándar (€15/m²)</option>
+                                <option value="premium">Vinilo premium (€25/m²)</option>
+                                <option value="cambio_color">Cambio de color (€30/m²)</option>
+                                <option value="personalizado">Diseño personalizado (€35/m²)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5>Parámetros de Trabajo</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="horas" class="form-label">Horas estimadas de trabajo:</label>
+                            <input type="number" class="form-control" id="horas" value="20" min="1">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tarifa" class="form-label">Tarifa por hora (€):</label>
+                            <input type="number" step="0.5" class="form-control" id="tarifa" value="30">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="factorExtra" class="form-label">Factor adicional de complejidad:</label>
+                            <select class="form-select" id="factorExtra">
+                                <option value="1.0">Normal (1.0)</option>
+                                <option value="1.2">Algo complejo (1.2)</option>
+                                <option value="1.5">Complejo (1.5)</option>
+                                <option value="2.0">Muy complejo (2.0)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <button id="calcularBtn" class="btn btn-primary btn-lg">Calcular Presupuesto</button>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Calculando...</span>
+            </div>
+            <p>Calculando presupuesto...</p>
+        </div>
+        
+        <div id="resultados" class="result-section mt-4" style="display: none;">
+            <h3>Resultado del Presupuesto</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Detalles del Vehículo</h5>
+                    <p><strong>Vehículo:</strong> <span id="res-vehiculo"></span></p>
+                    <p><strong>Medidas:</strong> <span id="res-medidas"></span></p>
+                    <p><strong>Tipo de vinilo:</strong> <span id="res-material"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Costes Estimados</h5>
+                    <p><strong>Área a cubrir:</strong> <span id="res-area"></span> m²</p>
+                    <p><strong>Metros lineales:</strong> <span id="res-metros"></span> m</p>
+                    <p><strong>Coste material:</strong> <span id="res-material-cost"></span> €</p>
+                    <p><strong>Coste mano de obra:</strong> <span id="res-mano-obra"></span> €</p>
+                    <h4 class="mt-3">Total estimado: <span id="res-total" class="text-success"></span> €</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const marcaSelect = document.getElementById('marca');
+            const modeloSelect = document.getElementById('modelo');
+            const calcularBtn = document.getElementById('calcularBtn');
+            const loadingDiv = document.getElementById('loading');
+            const resultadosDiv = document.getElementById('resultados');
+            
+            // Cargar modelos cuando se selecciona una marca
+            marcaSelect.addEventListener('change', function() {
+                const marca = this.value;
+                modeloSelect.disabled = !marca;
+                
+                if (marca) {
+                    fetch(`/modelos/${marca}`)
+                        .then(response => response.json())
+                        .then(modelos => {
+                            modeloSelect.innerHTML = '<option value="">-- Selecciona modelo --</option>';
+                            modelos.forEach(modelo => {
+                                const option = document.createElement('option');
+                                option.value = modelo;
+                                option.textContent = modelo;
+                                modeloSelect.appendChild(option);
+                            });
+                        });
+                }
+            });
+            
+            // Calcular presupuesto
+            calcularBtn.addEventListener('click', function() {
+                const marca = marcaSelect.value;
+                const modelo = modeloSelect.value;
+                
+                if (!marca || !modelo) {
+                    alert('Por favor, selecciona una marca y modelo válidos');
+                    return;
+                }
+                
+                loadingDiv.style.display = 'block';
+                resultadosDiv.style.display = 'none';
+                
+                const datos = {
+                    marca: marca,
+                    modelo: modelo,
+                    tipo_vinil: document.getElementById('tipoVinil').value,
+                    horas: document.getElementById('horas').value,
+                    tarifa: document.getElementById('tarifa').value,
+                    factor_extra: document.getElementById('factorExtra').value
+                };
+                
+                fetch('/calcular', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datos)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    
+                    if (data.success) {
+                        // Mostrar resultados
+                        document.getElementById('res-vehiculo').textContent = 
+                            `${marca.toUpperCase()} ${modelo}`;
+                        document.getElementById('res-medidas').textContent = 
+                            `Largo: ${data.vehiculo.medidas.largo}m, Ancho: ${data.vehiculo.medidas.ancho}m, Alto: ${data.vehiculo.medidas.alto}m`;
+                        document.getElementById('res-material').textContent = 
+                            data.resultados.descripcion_material;
+                        document.getElementById('res-area').textContent = 
+                            data.resultados.area;
+                        document.getElementById('res-metros').textContent = 
+                            data.resultados.metros_lineales;
+                        document.getElementById('res-material-cost').textContent = 
+                            data.resultados.coste_material;
+                        document.getElementById('res-mano-obra').textContent = 
+                            data.resultados.coste_mano_obra;
+                        document.getElementById('res-total').textContent = 
+                            data.resultados.total;
+                        
+                        resultadosDiv.style.display = 'block';
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    loadingDiv.style.display = 'none';
+                    alert('Error al calcular el presupuesto: ' + error.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+import requests
+from bs4 import BeautifulSoup
+import json
+
+def extraer_medidas(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    medidas = {}
+    tabla = soup.find('table', {'class': 'medidas'})
+    if tabla:
+        filas = tabla.find_all('tr')
+        for fila in filas[1:]:  # Saltar encabezado
+            celdas = fila.find_all('td')
+            if len(celdas) >= 4:
+                modelo = celdas[0].text.strip()
+                largo = float(celdas[1].text.replace(' mm', '').strip()) / 1000
+                ancho = float(celdas[2].text.replace(' mm', '').strip()) / 1000
+                alto = float(celdas[3].text.replace(' mm', '').strip()) / 1000
+                medidas[modelo] = {
+                    "largo": largo,
+                    "ancho": ancho,
+                    "alto": alto,
+                    "factor": 1.2  # Valor por defecto
+                }
+    return medidas
+
+# Ejemplo para Audi
+medidas_audi = extraer_medidas("https://www.medidasdecoches.com/audi")
+with open('medidas_audi.json', 'w') as f:
+    json.dump(medidas_audi, f, indent=2)

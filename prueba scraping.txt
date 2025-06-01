@@ -1,0 +1,33 @@
+import pandas as pd
+import requests
+from io import StringIO
+
+def descargar_datos_ue():
+    url = "https://www.eea.europa.eu/data-and-maps/data/co2-cars-emission-22/co2-passenger-cars-2023/at_download/file"
+    
+    # Descargar datos
+    response = requests.get(url)
+    response.raise_for_status()
+    
+    # Leer CSV
+    data = pd.read_csv(StringIO(response.text), sep='\t')
+    
+    # Filtrar y limpiar columnas relevantes
+    columnas = ['Make', 'Model', 'Vehicle length (mm)', 'Vehicle width (mm)', 'Vehicle height (mm)']
+    datos_vehiculos = data[columnas].dropna()
+    
+    # Renombrar columnas
+    datos_vehiculos.columns = ['marca', 'modelo', 'largo_mm', 'ancho_mm', 'alto_mm']
+    
+    # Convertir a metros y redondear
+    for col in ['largo_mm', 'ancho_mm', 'alto_mm']:
+        datos_vehiculos[col] = (datos_vehiculos[col]/1000).round(3)
+    
+    # Agrupar por modelo (promedio de versiones)
+    datos_agrupados = datos_vehiculos.groupby(['marca', 'modelo']).mean().reset_index()
+    
+    # Guardar como JSON
+    datos_agrupados.to_json('vehiculos_europeos.json', orient='records', indent=2)
+    print(f"Datos guardados para {len(datos_agrupados)} modelos europeos")
+
+descargar_datos_ue()

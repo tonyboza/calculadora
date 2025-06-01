@@ -1,0 +1,22 @@
+import requests
+import json
+
+def obtener_marcas():
+    url = "https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json"
+    response = requests.get(url)
+    return response.json()['Results']
+
+def obtener_modelos(marca_id):
+    url = f"https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMakeId/{marca_id}?format=json"
+    response = requests.get(url)
+    return response.json()['Results']
+
+# Ejemplo de uso
+marcas = obtener_marcas()
+with open('marcas.json', 'w') as f:
+    json.dump(marcas, f, indent=2)
+
+# Para BMW (MakeId=341)
+modelos_bmw = obtener_modelos(341)
+with open('modelos_bmw.json', 'w') as f:
+    json.dump(modelos_bmw, f, indent=2)
