@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Profesional de Vinilo para Autos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .brand-logos {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .brand-logo {
+            height: 60px;
+            margin: 10px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        select:focus, input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            display: none;
+        }
+        .result h2 {
+            color: #27ae60;
+            margin-top: 0;
+        }
+        .highlight {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .note {
+            background-color: #fffde7;
+            padding: 15px;
+            border-left: 4px solid #ffd600;
+            margin-top: 20px;
+        }
+        .details {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .details th, .details td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .details th {
+            background-color: #f2f2f2;
+        }
+        .details tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #e7f3fe !important;
+        }
+        .logos-footer {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .logo-footer {
+            height: 50px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        .logo-footer:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="brand-logos">
+            <img src="oracal.png" alt="Oracal" class="brand-logo">
+            <img src="totenser.jpg" alt="Totenser" class="brand-logo">
+        </div>
+        
+        <h1>Calculadora Profesional de Vinilo para Autos</h1>
+        
+        <div class="form-group">
+            <label for="marca">Selecciona la marca:</label>
+            <select id="marca">
+                <option value="">-- Selecciona --</option>
+                <option value="Audi">Audi</option>
+                <option value="BMW">BMW</option>
+                <option value="Citroën">Citroën</option>
+                <option value="Jaguar">Jaguar</option>
+                <option value="Jeep">Jeep</option>
+                <option value="Maserati">Maserati</option>
+                <option value="Mercedes">Mercedes</option>
+                <option value="Opel">Opel</option>
+                <option value="Peugeot">Peugeot</option>
+                <option value="Porsche">Porsche</option>
+                <option value="Renault">Renault</option>
+                <option value="Seat">Seat</option>
+                <option value="Tesla">Tesla</option>
+                <option value="Volkswagen">Volkswagen</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="modelo">Selecciona el modelo:</label>
+            <select id="modelo" disabled>
+                <option value="">-- Primero selecciona una marca --</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="ancho">Ancho del vinilo (metros):</label>
+            <input type="number" id="ancho" step="0.01" min="1.2" max="1.6" value="1.52" placeholder="Ej: 1.52">
+        </div>
+        
+        <button id="calcular">Calcular Vinilo Necesario</button>
+        
+        <div class="result" id="resultado">
+            <h2>Resultado para <span id="marca-modelo"></span>:</h2>
+            
+            <table class="details" id="detalles-corte">
+                <thead>
+                    <tr>
+                        <th>Parte del vehículo</th>
+                        <th>Metros lineales</th>
+                        <th>Ancho utilizado</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="detalles-body">
+                    <!-- Aquí se insertarán las filas dinámicamente -->
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong id="total-metros">0</strong> m</td>
+                        <td colspan="2">(de un rollo de <span id="ancho-vinilo">1.52</span>m de ancho)</td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="note">
+                <h3>Consideraciones técnicas:</h3>
+                <ul>
+                    <li>Los valores incluyen un 10% adicional para solapes y ajustes</li>
+                    <li>Para vehículos con muchas curvas o detalles, añadir un 5-10% extra</li>
+                    <li>El ancho estándar del vinilo es 1.52m (60 pulgadas)</li>
+                    <li id="nota-especifica"></li>
+                </ul>
+                <p class="highlight">Total recomendado con margen: <span id="total-recomendado">0</span> metros lineales</p>
+            </div>
+        </div>
+        
+        <div class="logos-footer">
+            <img src="oracal.png" alt="Oracal" class="logo-footer">
+            <img src="totenser.jpg" alt="Totenser" class="logo-footer">
+        </div>
+    </div>
+
+    <script>
+        // Base de datos completa de modelos con todas las marcas originales
+        const modelosDetallados = {
+            "Audi": {
+                "A3": calcularPartesStandard(14),
+                "A4": calcularPartesStandard(16),
+                "A6": calcularPartesStandard(18),
+                "Q3": calcularPartesSUV(20),
+                "Q5": calcularPartesSUV(22),
+                "Q7": calcularPartesSUV(25),
+                "TT": calcularPartesDeportivo(12)
+            },
+            "BMW": {
+                "Serie 1": calcularPartesStandard(14),
+                "Serie 3": calcularPartesStandard(16),
+                "Serie 5": calcularPartesStandard(18),
+                "X1": calcularPartesSUV(19),
+                "X3": calcularPartesSUV(22),
+                "X5": calcularPartesSUV(25),
+                "X6": calcularPartesSUV(26),
+                "Z4": calcularPartesDeportivo(13)
+            },
+            "Citroën": {
+                "C3": calcularPartesStandard(12),
+                "C4": calcularPartesStandard(14),
+                "C5": calcularPartesStandard(16),
+                "Berlingo": calcularPartesFurgoneta(18)
+            },
+            "Jaguar": {
+                "XE": calcularPartesStandard(16),
+                "XF": calcularPartesStandard(18),
+                "F-PACE": calcularPartesSUV(22),
+                "E-PACE": calcularPartesSUV(21)
+            },
+            "Jeep": {
+                "Renegade": calcularPartesSUV(19),
+                "Cherokee": calcularPartesSUV(22),
+                "Grand Cherokee": calcularPartesSUV(25),
+                "Wrangler": calcularPartesSUV(24)
+            },
+            "Maserati": {
+                "Ghibli": calcularPartesDeportivo(18),
+                "Quattroporte": calcularPartesDeportivo(20),
+                "Levante": calcularPartesSUV(23),
+                "GranTurismo": calcularPartesDeportivo(19)
+            },
+            "Mercedes": {
+                "Clase A": calcularPartesStandard(14),
+                "Clase C": calcularPartesStandard(16),
+                "Clase E": calcularPartesStandard(18),
+                "Clase S": calcularPartesStandard(20),
+                "GLA": calcularPartesSUV(19),
+                "GLC": calcularPartesSUV(22),
+                "GLE": calcularPartesSUV(24),
+                "GLS": calcularPartesSUV(26)
+            },
+            "Opel": {
+                "Corsa": calcularPartesStandard(12),
+                "Astra": calcularPartesStandard(14),
+                "Insignia": calcularPartesStandard(16),
+                "Mokka": calcularPartesSUV(18)
+            },
+            "Peugeot": {
+                "208": calcularPartesStandard(12),
+                "308": calcularPartesStandard(14),
+                "508": calcularPartesStandard(16),
+                "3008": calcularPartesSUV(19),
+                "5008": calcularPartesSUV(21)
+            },
+            "Porsche": {
+                "911": calcularPartesDeportivo(15),
+                "Cayenne": calcularPartesSUV(23),
+                "Macan": calcularPartesSUV(21),
+                "Taycan": calcularPartesDeportivo(18),
+                "Panamera": calcularPartesDeportivo(19)
+            },
+            "Renault": {
+                "Clio": calcularPartesStandard(12),
+                "Megane": calcularPartesStandard(14),
+                "Kadjar": calcularPartesSUV(18),
+                "Captur": calcularPartesSUV(17)
+            },
+            "Seat": {
+                "Ibiza": calcularPartesStandard(12),
+                "León": calcularPartesStandard(14),
+                "Ateca": calcularPartesSUV(18),
+                "Tarraco": calcularPartesSUV(20)
+            },
+            "Tesla": {
+                "Model 3": calcularPartesStandard(18),
+                "Model S": calcularPartesStandard(20),
+                "Model X": calcularPartesSUV(24),
+                "Model Y": calcularPartesSUV(22)
+            },
+            "Volkswagen": {
+                "Golf": calcularPartesStandard(14),
+                "Passat": calcularPartesStandard(16),
+                "Tiguan": calcularPartesSUV(19),
+                "T-Roc": calcularPartesSUV(18),
+                "Arteon": calcularPartesStandard(17),
+                "Touareg": calcularPartesSUV(23)
+            }
+        };
+
+        // Funciones para calcular partes estándar según tipo de vehículo
+        function calcularPartesStandard(totalBase) {
+            return {
+                "Capó": { metros: totalBase * 0.15, anchoUtilizado: 1.4 },
+                "Aletas delanteras": { metros: totalBase * 0.12, anchoUtilizado: 0.8, observaciones: "2 piezas (1 por lado)" },
+                "Puertas laterales": { metros: totalBase * 0.28, anchoUtilizado: 1.2, observaciones: "4 piezas (2 por lado)" },
+                "Techo": { metros: totalBase * 0.15, anchoUtilizado: 1.3 },
+                "Maletero": { metros: totalBase * 0.10, anchoUtilizado: 1.2 },
+                "Parachoques delantero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 },
+                "Parachoques trasero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 }
+            };
+        }
+
+        function calcularPartesSUV(totalBase) {
+            return {
+                "Capó": { metros: totalBase * 0.16, anchoUtilizado: 1.4 },
+                "Aletas delanteras": { metros: totalBase * 0.14, anchoUtilizado: 0.8, observaciones: "2 piezas (1 por lado)" },
+                "Puertas laterales": { metros: totalBase * 0.30, anchoUtilizado: 1.2, observaciones: "4 piezas (2 por lado)" },
+                "Techo": { metros: totalBase * 0.15, anchoUtilizado: 1.3 },
+                "Portón trasero": { metros: totalBase * 0.15, anchoUtilizado: 1.2 },
+                "Parachoques delantero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 },
+                "Parachoques trasero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 }
+            };
+        }
+
+        function calcularPartesDeportivo(totalBase) {
+            return {
+                "Capó": { metros: totalBase * 0.20, anchoUtilizado: 1.3 },
+                "Aletas delanteras": { metros: totalBase * 0.15, anchoUtilizado: 0.8, observaciones: "2 piezas (1 por lado)" },
+                "Puertas laterales": { metros: totalBase * 0.25, anchoUtilizado: 1.1, observaciones: "2 piezas" },
+                "Techo": { metros: totalBase * 0.15, anchoUtilizado: 1.2 },
+                "Maletero": { metros: totalBase * 0.15, anchoUtilizado: 1.1 },
+                "Parachoques delantero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 },
+                "Parachoques trasero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 }
+            };
+        }
+
+        function calcularPartesFurgoneta(totalBase) {
+            return {
+                "Capó": { metros: totalBase * 0.10, anchoUtilizado: 1.4 },
+                "Puertas laterales": { metros: totalBase * 0.40, anchoUtilizado: 1.2, observaciones: "3-4 piezas" },
+                "Techo": { metros: totalBase * 0.20, anchoUtilizado: 1.3 },
+                "Portón trasero": { metros: totalBase * 0.20, anchoUtilizado: 1.2 },
+                "Parachoques delantero": { metros: totalBase * 0.10, anchoUtilizado: 0.75 }
+            };
+        }
+
+        // Elementos del DOM
+        const marcaSelect = document.getElementById('marca');
+        const modeloSelect = document.getElementById('modelo');
+        const anchoInput = document.getElementById('ancho');
+        const calcularBtn = document.getElementById('calcular');
+        const resultadoDiv = document.getElementById('resultado');
+        const marcaModeloSpan = document.getElementById('marca-modelo');
+        const detallesBody = document.getElementById('detalles-body');
+        const totalMetrosSpan = document.getElementById('total-metros');
+        const totalRecomendadoSpan = document.getElementById('total-recomendado');
+        const anchoViniloSpan = document.getElementById('ancho-vinilo');
+        const notaEspecifica = document.getElementById('nota-especifica');
+
+        // Cargar modelos cuando se selecciona una marca
+        marcaSelect.addEventListener('change', function() {
+            const marca = this.value;
+            
+            modeloSelect.innerHTML = '<option value="">-- Selecciona un modelo --</option>';
+            modeloSelect.disabled = !marca;
+            
+            if (marca && modelosDetallados[marca]) {
+                Object.keys(modelosDetallados[marca]).forEach(modelo => {
+                    const option = document.createElement('option');
+                    option.value = modelo;
+                    option.textContent = modelo;
+                    modeloSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Función para agrupar piezas por ancho y optimizar el cálculo
+        function optimizarCortes(partes, anchoVinilo) {
+            const grupos = {};
+            
+            // Agrupar piezas por su ancho requerido
+            Object.keys(partes).forEach(parte => {
+                const detalle = partes[parte];
+                const ancho = detalle.anchoUtilizado;
+                
+                if (!grupos[ancho]) {
+                    grupos[ancho] = [];
+                }
+                
+                grupos[ancho].push({
+                    nombre: parte,
+                    metros: detalle.metros,
+                    observaciones: detalle.observaciones || '-'
+                });
+            });
+            
+            let totalOptimizado = 0;
+            const detallesMostrar = [];
+            
+            // Procesar cada grupo de ancho
+            Object.keys(grupos).forEach(ancho => {
+                const anchoNum = parseFloat(ancho);
+                const piezas = grupos[ancho];
+                
+                if (anchoNum <= anchoVinilo / 2) {
+                    // Podemos colocar 2 piezas en paralelo
+                    let metrosGrupo = 0;
+                    
+                    // Ordenamos las piezas de mayor a menor
+                    piezas.sort((a, b) => b.metros - a.metros);
+                    
+                    // Emparejamos las piezas y tomamos la mayor de cada par
+                    for (let i = 0; i < piezas.length; i += 2) {
+                        if (i + 1 < piezas.length) {
+                            metrosGrupo += Math.max(piezas[i].metros, piezas[i+1].metros);
+                        } else {
+                            metrosGrupo += piezas[i].metros;
+                        }
+                    }
+                    
+                    totalOptimizado += metrosGrupo;
+                    
+                    // Añadimos todas las piezas para mostrar
+                    piezas.forEach(pieza => {
+                        detallesMostrar.push({
+                            ...pieza,
+                            anchoUtilizado: ancho,
+                            optimizado: true
+                        });
+                    });
+                } 
+                else if (anchoNum <= anchoVinilo) {
+                    // Sumamos normalmente los metros
+                    const metrosGrupo = piezas.reduce((sum, pieza) => sum + pieza.metros, 0);
+                    totalOptimizado += metrosGrupo;
+                    
+                    piezas.forEach(pieza => {
+                        detallesMostrar.push({
+                            ...pieza,
+                            anchoUtilizado: ancho,
+                            optimizado: false
+                        });
+                    });
+                }
+                else {
+                    // Caso especial (ancho mayor que el vinilo)
+                    const factor = anchoNum / anchoVinilo;
+                    const metrosGrupo = piezas.reduce((sum, pieza) => sum + (pieza.metros * factor), 0);
+                    totalOptimizado += metrosGrupo;
+                    
+                    piezas.forEach(pieza => {
+                        detallesMostrar.push({
+                            ...pieza,
+                            anchoUtilizado: ancho,
+                            optimizado: false,
+                            observaciones: (pieza.observaciones === '-' ? '' : pieza.observaciones + ' ') + 
+                                          '(Requiere unión por ancho insuficiente)'
+                        });
+                    });
+                }
+            });
+            
+            return {
+                total: totalOptimizado,
+                detalles: detallesMostrar
+            };
+        }
+
+        // Calcular vinilo necesario (versión optimizada)
+        calcularBtn.addEventListener('click', function() {
+            const marca = marcaSelect.value;
+            const modelo = modeloSelect.value;
+            const anchoVinilo = parseFloat(anchoInput.value) || 1.52;
+            
+            if (!marca || !modelo) {
+                alert('Por favor selecciona marca y modelo');
+                return;
+            }
+            
+            if (!modelosDetallados[marca] || !modelosDetallados[marca][modelo]) {
+                alert('Modelo no encontrado en la base de datos');
+                return;
+            }
+            
+            // Mostrar nombre del vehículo
+            marcaModeloSpan.textContent = `${marca} ${modelo}`;
+            anchoViniloSpan.textContent = anchoVinilo;
+            
+            // Limpiar tabla de detalles
+            detallesBody.innerHTML = '';
+            
+            // Obtener las partes del vehículo
+            const partes = modelosDetallados[marca][modelo];
+            
+            // Optimizar el cálculo considerando el ancho del vinilo
+            const resultadoOptimizado = optimizarCortes(partes, anchoVinilo);
+            let totalMetros = resultadoOptimizado.total;
+            
+            // Ajustar por el ancho del vinilo vs ancho estándar (1.52m)
+            totalMetros *= (1.52 / anchoVinilo);
+            
+            // Mostrar las piezas en la tabla
+            resultadoOptimizado.detalles.forEach(pieza => {
+                const row = document.createElement('tr');
+                
+                const cellParte = document.createElement('td');
+                cellParte.textContent = pieza.nombre;
+                
+                const cellMetros = document.createElement('td');
+                cellMetros.textContent = pieza.metros.toFixed(2);
+                
+                const cellAncho = document.createElement('td');
+                cellAncho.textContent = pieza.anchoUtilizado + 'm';
+                
+                const cellObs = document.createElement('td');
+                cellObs.textContent = pieza.observaciones;
+                
+                if (pieza.optimizado) {
+                    row.style.backgroundColor = '#f0fff0';
+                }
+                
+                row.appendChild(cellParte);
+                row.appendChild(cellMetros);
+                row.appendChild(cellAncho);
+                row.appendChild(cellObs);
+                
+                detallesBody.appendChild(row);
+            });
+            
+            // Añadir margen de seguridad (10%)
+            const totalConMargen = totalMetros * 1.10;
+            
+            // Mostrar totales
+            totalMetrosSpan.textContent = totalMetros.toFixed(2);
+            totalRecomendadoSpan.textContent = totalConMargen.toFixed(2);
+            
+            // Nota específica según el vehículo
+            if (totalMetros > 22) {
+                notaEspecifica.textContent = "Vehículo grande: considerar comprar un 10% adicional para posibles errores en partes complejas.";
+            } else if (totalMetros > 16) {
+                notaEspecifica.textContent = "Vehículo mediano: el margen incluido debería ser suficiente, pero considerar detalles complejos.";
+            } else {
+                notaEspecifica.textContent = "Vehículo pequeño: con el margen incluido deberías tener suficiente material.";
+            }
+            
+            resultadoDiv.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
